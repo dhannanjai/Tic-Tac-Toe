@@ -43,9 +43,5 @@ private:
 	Graphics gfx;
 	/********************************/
 	/*  User Variables          */
-	int x = 200;
-	int y = 300;
-	int lengthx = 20;
-	int lengthy = 20;
 	/********************************/
 };
