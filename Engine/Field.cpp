@@ -45,20 +45,17 @@ void Field::Tile::Draw(const Vec2i & screenpos, Graphics & gfx) const
 	switch (state)
 	{
 	case State::Hidden:
-		SpriteCodex::DrawTileButton(screenpos, gfx);
+		SpriteCodex::DrawTileHidden(screenpos, gfx);
 		break;
 	case State::Crossed:
-		SpriteCodex::DrawTileCross(screenpos, gfx);
+		SpriteCodex::DrawTilePress(screenpos, gfx);
 		break;
 	case State::Bombed:
-		SpriteCodex::DrawTileBomb(screenpos, gfx);
+		SpriteCodex::DrawTileAI(screenpos, gfx);
 		break;
 	}
 }
 
-Field::Field()
-{
-}
 
 bool Field::OnClick(const Vec2i offset, const Vec2i & screenpos)
 {
@@ -99,9 +96,6 @@ Vec2i Field::ScreenToGrid(const Vec2i & offset, const Vec2i screenpos)
 
 void Field::Draw(const Vec2i & offset, Graphics & gfx) const
 {
-	RectI rect = GetRect(offset);
-	gfx.DrawRect(rect, SpriteCodex::baseColor);
-
 	Vec2i gridpos = Vec2i(0, 0);
 	for (; gridpos.x < width; gridpos.x++)
 	{

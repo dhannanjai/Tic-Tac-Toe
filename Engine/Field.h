@@ -29,7 +29,6 @@ private :
 		void Draw(const Vec2i& offset, Graphics& gfx)const;
 	};
 public:
-	Field();
 	bool OnClick(const Vec2i offset,const Vec2i& screenpos);
 	RectI GetRect(const Vec2i& offset)const;
 	Tile& TileAt(const Vec2i& gridpos);
