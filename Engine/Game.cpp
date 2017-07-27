@@ -41,23 +41,26 @@ void Game::Go()
 
 void Game::UpdateModel()
 {
-	bool isClicked = false;
-
-	while (!wnd.mouse.IsEmpty())
+	if (!field.IsDraw() || !field.HasWon() || !field.HasLost())
 	{
-		const auto e = wnd.mouse.Read();
-		if (e.GetType() == Mouse::Event::Type::LPress)
+		bool isClicked = false;
+
+		while (!wnd.mouse.IsEmpty())
 		{
-			Vec2i screenPos = wnd.mouse.GetPos();
-			if (field.GetRect(offset).Contains(screenPos))
+			const auto e = wnd.mouse.Read();
+			if (e.GetType() == Mouse::Event::Type::LPress)
 			{
-				isClicked = field.OnClick(offset, screenPos);
+				Vec2i screenPos = wnd.mouse.GetPos();
+				if (field.GetRect(offset).Contains(screenPos))
+				{
+					isClicked = field.OnClick(offset, screenPos);
+				}
 			}
 		}
-	}
 
-	if (isClicked)
-		field.MoveBestMove();
+		if (isClicked)
+			field.MoveBestMove();
+	}
 }
 
 void Game::ComposeFrame()
