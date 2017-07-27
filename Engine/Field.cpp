@@ -51,7 +51,7 @@ Field::Field()
 void Field::OnClick(const Vec2i offset, const Vec2i & screenpos)
 {
 	Vec2i gridpos = ScreenToGrid(offset, screenpos);
-	Tile tile = TileAt(gridpos);
+	Tile& tile = TileAt(gridpos);
 	
 	assert(gridpos.x >= 0 && gridpos.y < width && gridpos.y >= 0 && gridpos.y < height);
 
