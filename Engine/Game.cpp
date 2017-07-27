@@ -22,10 +22,12 @@
 #include "Game.h"
 #include"Graphics.h"
 
+
 Game::Game( MainWindow& wnd )
 	:
 	wnd( wnd ),
-	gfx( wnd )
+	gfx( wnd ),
+	offset(Graphics::GetScreenRect().GetCenter() - Vec2i((Field::width * SpriteCodex::tileSize) / 2, (Field::height * SpriteCodex::tileSize) / 2))
 {
 }
 
@@ -39,9 +41,19 @@ void Game::Go()
 
 void Game::UpdateModel()
 {
+	while (!wnd.mouse.IsEmpty())
+	{
+		const auto e = wnd.mouse.Read();
+		if (e.GetType() == Mouse::Event::Type::LPress)
+		{
+			Vec2i screenPos = wnd.mouse.GetPos();
+			if (field.GetRect(offset).Contains(screenPos))
+				field.OnClick(offset, screenPos);
+		}
+	}
 }
 
 void Game::ComposeFrame()
 {
-
+	field.Draw(offset, gfx);
 }

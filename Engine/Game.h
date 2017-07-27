@@ -23,6 +23,7 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "Graphics.h"
+#include"Field.h"
 
 class Game
 {
@@ -43,5 +44,7 @@ private:
 	Graphics gfx;
 	/********************************/
 	/*  User Variables          */
+	Field field;
+	Vec2i offset;
 	/********************************/
 };

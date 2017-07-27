@@ -1,6 +1,6 @@
 #pragma once
 #include"Vec2i.h"
-
+#include"SpriteCodex.h"
 class Field
 {
 private :
@@ -23,12 +23,23 @@ private :
 
 		void Cross();
 		void Bomb();
+
+		void Draw(const Vec2i& offset, Graphics& gfx)const;
 	};
 public:
-	void OnClick(const Vec2i& screenpos);
-	
+	Field();
+	void OnClick(const Vec2i offset,const Vec2i& screenpos);
+	RectI GetRect(const Vec2i& offset)const;
 	Tile& TileAt(const Vec2i& gridpos);
 	const Tile& TileAt(const Vec2i& gridpos)const;
 
 	Vec2i ScreenToGrid(const Vec2i& offset, const Vec2i screenpos);
+
+	void Draw(const Vec2i& offset,Graphics& gfx)const;
+
+public:
+	const static int width = 3;
+	const static int height = 3;
+private:
+	Tile tiles[width*height];
 };
