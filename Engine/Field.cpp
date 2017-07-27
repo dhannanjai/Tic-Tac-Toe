@@ -67,13 +67,13 @@ RectI Field::GetRect(const Vec2i & offset) const
 Field::Tile & Field::TileAt(const Vec2i & gridpos)
 {
 	assert(gridpos.x >= 0 && gridpos.y < width && gridpos.y >= 0 && gridpos.y < height);
-	return tiles[gridpos.x + gridpos.y * width];
+	return tiles[gridpos.x][gridpos.y];
 }
 
 const Field::Tile & Field::TileAt(const Vec2i & gridpos) const
 {
 	assert(gridpos.x >= 0 && gridpos.y < width && gridpos.y >= 0 && gridpos.y < height);
-	return tiles[gridpos.x + gridpos.y * width];
+	return tiles[gridpos.x][gridpos.y];
 }
 
 Vec2i Field::ScreenToGrid(const Vec2i & offset, const Vec2i screenpos)

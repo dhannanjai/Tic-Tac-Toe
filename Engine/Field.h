@@ -41,5 +41,5 @@ public:
 	const static int width = 3;
 	const static int height = 3;
 private:
-	Tile tiles[width*height];
+	Tile tiles[width][height];
 };
