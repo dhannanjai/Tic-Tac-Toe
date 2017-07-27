@@ -41,6 +41,8 @@ void Game::Go()
 
 void Game::UpdateModel()
 {
+	bool isClicked = false;
+
 	while (!wnd.mouse.IsEmpty())
 	{
 		const auto e = wnd.mouse.Read();
@@ -48,9 +50,14 @@ void Game::UpdateModel()
 		{
 			Vec2i screenPos = wnd.mouse.GetPos();
 			if (field.GetRect(offset).Contains(screenPos))
-				field.OnClick(offset, screenPos);
+			{
+				isClicked = field.OnClick(offset, screenPos);
+			}
 		}
 	}
+
+	if (isClicked)
+		field.MoveBestMove();
 }
 
 void Game::ComposeFrame()

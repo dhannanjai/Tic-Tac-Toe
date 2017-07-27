@@ -23,12 +23,14 @@ private :
 
 		void Cross();
 		void Bomb();
+		void Hide();
+		bool operator==(const Tile& rhs)const;
 
 		void Draw(const Vec2i& offset, Graphics& gfx)const;
 	};
 public:
 	Field();
-	void OnClick(const Vec2i offset,const Vec2i& screenpos);
+	bool OnClick(const Vec2i offset,const Vec2i& screenpos);
 	RectI GetRect(const Vec2i& offset)const;
 	Tile& TileAt(const Vec2i& gridpos);
 	const Tile& TileAt(const Vec2i& gridpos)const;
@@ -36,6 +38,14 @@ public:
 	Vec2i ScreenToGrid(const Vec2i& offset, const Vec2i screenpos);
 
 	void Draw(const Vec2i& offset,Graphics& gfx)const;
+	/************** Artificial Intelligece down there  ;D **************/
+private:
+	int evaluate()const;
+	bool IsMovesLeft()const;
+	int minimax(int depth, bool isMax);
+public:
+	void MoveBestMove();
+	/*******************************************************************/
 
 public:
 	const static int width = 3;

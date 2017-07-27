@@ -20,11 +20,4 @@ public:
 	// Win Screen 254x192 center origin
 	static void DrawWin(const Vec2i& pos, Graphics& gfx);
 
-	// Text for size selection (center origin)
-	//
-	static constexpr int sizeselWidth = 240;
-	static constexpr int sizeselHeight = 56;
-	static void DrawSmall(const Vec2i& pos, Graphics& gfx);
-	static void DrawMedium(const Vec2i& pos, Graphics& gfx);
-	static void DrawLarge(const Vec2i& pos, Graphics& gfx);
 };
