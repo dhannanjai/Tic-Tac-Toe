@@ -40,11 +40,14 @@ public:
 	void Draw(const Vec2i& offset,Graphics& gfx)const;
 	/************** Artificial Intelligece down there  ;D **************/
 private:
-	int evaluate()const;
-	bool IsMovesLeft()const;
+	int EvaluateScore()const;
 	int minimax(int depth, bool isMax);
+	
 public:
 	void MoveBestMove();
+	bool HasWon()const;
+	bool HasLost()const;
+	bool IsDraw()const;
 	/*******************************************************************/
 
 public:

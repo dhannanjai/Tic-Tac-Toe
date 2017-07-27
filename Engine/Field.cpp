@@ -112,7 +112,7 @@ void Field::Draw(const Vec2i & offset, Graphics & gfx) const
 	}
 }
 
-int Field::evaluate() const
+int Field::EvaluateScore() const
 {
 	/****along the rows****/
 	for (int rows = 0; rows < width; rows++)
@@ -157,95 +157,82 @@ int Field::evaluate() const
 	return 0;
 }
 
-bool Field::IsMovesLeft() const
+int Field::minimax(int depth, bool player)
 {
-		for (int i = 0; i < width; i++)
-			for (int j = 0; j < height; j++)
-				if (tiles[i][j].IsHidden())
-					return true;
-		return false;
-}
+	int score = EvaluateScore();
 
-int Field::minimax(int depth, bool isMax)
-{
-	int score = evaluate();
-
-	// If Maximizer has won the game return his/her
-	// evaluated score
-	if (score == 10)
-		return score;
-
-	// If Minimizer has won the game return his/her
-	// evaluated score
-	if (score == -10)
-		return score;
-
-	// If there are no more moves and no winner then
-	// it is a tie
-	if (IsMovesLeft() == false)
-		return 0;
-
-	if (isMax)// If this maximizer's move
+	if (player)// If this is player's move.
 	{
 		int best = -1000;
-		for (int i = 0; i<width; i++) // Traverse all cells
-		{
-			for (int j = 0; j<height; j++)
-			{
-				if (tiles[i][j].IsHidden())// Check if cell is empty
-				{
-					tiles[i][j].Cross();// Make the move
-										 // Call minimax recursively and choose the maximum value
-					best = std::max<int>(best, minimax(depth + 1, !isMax));
+		for (int i = 0; i<width; i++) {					
+			for (int j = 0; j<height; j++){
+				if (tiles[i][j].IsHidden()){	
+					tiles[i][j].Cross(); // take the condition to cross it and check if it is worth it in next statement.
+
+					best = std::max<int>(best, minimax(depth + 1, !player)); // give the opponent(ie the AI) the chance and check the best score.
+					
 					tiles[i][j].Hide();// Undo the move
 				}
 			}
 		}
-		return best;
+		return best + score;
 	}
-	else// If this minimizer's move
+	else// If this is AI's move
 	{
 		int best = 1000;
-		for (int i = 0; i<width; i++)// Traverse all cells
-		{
-			for (int j = 0; j<height; j++)
-			{
-				if (tiles[i][j].IsHidden())// Check if cell is empty
+		for (int i = 0; i<width; i++){
+			for (int j = 0; j<height; j++){
+				if (tiles[i][j].IsHidden())
 				{
+					tiles[i][j].Bomb();//  take the condition to cross it and check if it is worth it in next statement.
 
-					tiles[i][j].Bomb();// Make the move
-					best = std::min<int>(best, minimax(depth + 1, !isMax));
-					// Call minimax recursively and choose the minimum value
+					best = std::min<int>(best, minimax(depth + 1, !player)); // give the opponent(ie the player) the chance and check the best score.
 
 					tiles[i][j].Hide();// Undo the move
 				}
 			}
 		}
-		return best;
+		return best + score;
 	}
 }
 
-void Field::MoveBestMove()
+bool Field::HasWon() const
 {
-	int bestVal = -1000;
-	
-	Vec2i bestMove = Vec2i(-1, -1);
-	
+	return (EvaluateScore() > 0);
+}
+
+bool Field::HasLost() const
+{
+	return (EvaluateScore() < 0);
+}
+
+bool Field::IsDraw() const
+{
 	int count = 0;
 	for (int i = 0; i < width; i++)
 	{
 		for (int j = 0; j < height; j++)
 			if (!tiles[i][j].IsHidden())
 				count++;
-	}
+	}//to check it does go on bombing somewhere and give assertion error.
 	if (count < width*height)
+		return false;
+	return true;
+}
+
+void Field::MoveBestMove()
+{
+	if (HasWon() || HasLost())
+		return;
+
+	int bestVal = -1000;
+	
+	Vec2i bestMove = Vec2i(-1, -1);
+
+	if (!IsDraw())
 	{
-		// Traverse all cells, evalutae minimax function for all empty cells. And return the cell with optimal value.
-		for (int i = 0; i < width; i++)
-		{
-			for (int j = 0; j < height; j++)
-			{
-				// Check if celll is empty
+		for (int i = 0; i < width; i++){
+			for (int j = 0; j < height; j++){
 				if (tiles[i][j].IsHidden())
 				{
 					// Make the move
@@ -257,8 +244,8 @@ void Field::MoveBestMove()
 					// Undo the move
 					tiles[i][j].Hide();
 
-					// If the value of the current move is more than the best value, then update best
-					if (moveVal > bestVal)
+					// update best
+					if (moveVal >= bestVal)
 					{
 						bestMove.x = i;
 						bestMove.y = j;
@@ -267,8 +254,8 @@ void Field::MoveBestMove()
 				}
 			}
 		}
-
-		tiles[bestMove.x][bestMove.y].Bomb();
+		if (bestMove.x != -1 && bestMove.y != -1)
+			tiles[bestMove.x][bestMove.y].Bomb();
 	}
 }
 
