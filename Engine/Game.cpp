@@ -41,7 +41,7 @@ void Game::Go()
 
 void Game::UpdateModel()
 {
-	if (!field.IsDraw() || !field.HasWon() || !field.HasLost())
+	if (!field.IsDraw() && !field.HasWon() && !field.HasLost())
 	{
 		bool isClicked = false;
 
