@@ -40,8 +40,9 @@ public:
 	/************** Artificial Intelligece down there  ;D **************/
 private:
 	int EvaluateScore()const;
-	int minimax(int depth, bool isMax);
-	
+	int minimax( bool isMax);
+	int EvaluateLine(int x1, int y1, int x2, int y2, int x3, int y3)const;
+	int EvaluateState()const;
 public:
 	void MoveBestMove();
 	bool HasWon()const;
@@ -53,5 +54,5 @@ public:
 	const static int width = 3;
 	const static int height = 3;
 private:
-	Tile tiles[width][height];
+	Tile tile[width][height];
 };

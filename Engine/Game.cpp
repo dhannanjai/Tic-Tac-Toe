@@ -66,5 +66,4 @@ void Game::UpdateModel()
 void Game::ComposeFrame()
 {
 	field.Draw(offset, gfx);
-	//SpriteCodex::DrawTilePress(offset, gfx);
 }

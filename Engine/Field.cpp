@@ -56,7 +56,6 @@ void Field::Tile::Draw(const Vec2i & screenpos, Graphics & gfx) const
 	}
 }
 
-
 bool Field::OnClick(const Vec2i offset, const Vec2i & screenpos)
 {
 	Vec2i gridpos = ScreenToGrid(offset, screenpos);
@@ -80,13 +79,13 @@ RectI Field::GetRect(const Vec2i & offset) const
 Field::Tile & Field::TileAt(const Vec2i & gridpos)
 {
 	assert(gridpos.x >= 0 && gridpos.y < width && gridpos.y >= 0 && gridpos.y < height);
-	return tiles[gridpos.x][gridpos.y];
+	return tile[gridpos.x][gridpos.y];
 }
 
 const Field::Tile & Field::TileAt(const Vec2i & gridpos) const
 {
 	assert(gridpos.x >= 0 && gridpos.y < width && gridpos.y >= 0 && gridpos.y < height);
-	return tiles[gridpos.x][gridpos.y];
+	return tile[gridpos.x][gridpos.y];
 }
 
 Vec2i Field::ScreenToGrid(const Vec2i & offset, const Vec2i screenpos)
@@ -106,98 +105,170 @@ void Field::Draw(const Vec2i & offset, Graphics & gfx) const
 	}
 }
 
-int Field::EvaluateScore() const
+int Field::EvaluateLine(int a, int b, int m, int n, int x, int y) const
+{
+	int score = 0;
+
+	// first tile 
+	if (tile[a][b].IsBombed())			// the tile[a][b] belongs to AI
+		score = 1;
+	else if (tile[a][b].IsCrossed())	// the tile[a][b] belongs to player
+		score = -1;
+
+	//second tile
+	if (tile[m][n].IsBombed())			// the tile[m][n] belongs to AI
+	{
+		if (score == 1)					// 2- in a line
+			score = 10;
+		else if (score == -1)			// 1- in a  line
+			return 0;
+		else							// tile[a][b] is not occupied yet but tile[m][n] is
+			score = 1;
+	}
+	else if (tile[m][n].IsCrossed())	// if tile[m][n] is Crossed
+	{
+		if (score == -1)					// 2- in a line 
+			score = 10;
+		else if (score == 1)			// 1- in a line
+			return 0;
+		else							// tile[a][b] is not occupied yet but tile[m][n] is
+			score = 1;
+	}
+
+	//third tile
+	if (tile[x][y].IsBombed())			// if tile[x][y] is bombed.
+	{
+		if (score > 0)					//means either 2- or 1- in a row for AI.
+			score *= 10;
+		else if (score < 0)				// means either 2- or 1- in a row for player.
+			return 0;
+		else							// means tile[a][b] and tile[m][n] is unoccupied.
+			score = 1;
+	}
+	else if (tile[x][y].IsCrossed())	// if tile[x][y] is crossed
+	{
+		if (score < 0)					// means either 2- or 1- in a row for player.
+			score *= 10;
+		else if (score > 1)				//means either 2 - or 1 - in a row for AI.
+			return 0;
+		else							//means tile[a][b] and tile[m][n] is unoccupied.
+			score = -1;
+	}
+
+	return score;
+}
+
+int Field::EvaluateState() const
 {
 	/****along the rows****/
 	for (int rows = 0; rows < width; rows++)
 	{
-		if (tiles[rows][0] == tiles[rows][1] && tiles[rows][1] == tiles[rows][2])
+		if (tile[rows][0] == tile[rows][1] && tile[rows][1] == tile[rows][2])
 		{
-			if (tiles[rows][0].IsCrossed())
+			if (tile[rows][0].IsCrossed())
 				return 10;
-			else if (tiles[rows][0].IsBombed())
+			else if (tile[rows][0].IsBombed())
 				return -10;
 		}
 	}
 	/****along the cols****/
 	for (int cols = 0; cols < height; cols++)
 	{
-		if (tiles[0][cols] == tiles[1][cols] && tiles[1][cols] == tiles[2][cols])
+		if (tile[0][cols] == tile[1][cols] && tile[1][cols] == tile[2][cols])
 		{
-			if (tiles[0][cols].IsCrossed())
+			if (tile[0][cols].IsCrossed())
 				return 10;
-			else if (tiles[0][cols].IsBombed())
+			else if (tile[0][cols].IsBombed())
 				return -10;
 		}
 	}
 	/********************/
 	/* in the diagnols */
-	if (tiles[0][0] == tiles[1][1] && tiles[1][1] == tiles[2][2])
+	if (tile[0][0] == tile[1][1] && tile[1][1] == tile[2][2])
 	{
-		if (tiles[0][0].IsCrossed())
+		if (tile[0][0].IsCrossed())
 			return +10;
-		else if (tiles[0][0].IsBombed())
+		else if (tile[0][0].IsBombed())
 			return -10;
 	}
 
-	if (tiles[0][2] == tiles[1][1] && tiles[1][1] == tiles[2][0])
+	if (tile[0][2] == tile[1][1] && tile[1][1] == tile[2][0])
 	{
-		if (tiles[0][2].IsCrossed())
+		if (tile[0][2].IsCrossed())
 			return +10;
-		else if (tiles[0][2].IsBombed())
+		else if (tile[0][2].IsBombed())
 			return -10;
 	}
 	/*****************/
 	return 0;
 }
 
-int Field::minimax(int depth, bool player)
+int Field::EvaluateScore() const
 {
+	int score = 0;
+	score += EvaluateLine(0, 0, 0, 1, 0, 2);	// for col 0
+	score += EvaluateLine(1, 0, 1, 1, 1, 2);	// for col 1
+	score += EvaluateLine(2, 0, 2, 1, 2, 2);	// for col 2
+	score += EvaluateLine(0, 0, 1, 0, 2, 0);	// for row 0
+	score += EvaluateLine(0, 1, 1, 1, 2, 1);	// for row 1
+	score += EvaluateLine(0, 2, 1, 2, 2, 2);	// for row 2
+	score += EvaluateLine(0, 0, 1, 1, 2, 2);	// for diagnol 0
+	score += EvaluateLine(0, 2, 1, 1, 2, 0);	// for diagnol 1
+	return score;
+}
+
+int Field::minimax(bool player)
+{
+	//first, evaluate the current score of the position of the board.
 	int score = EvaluateScore();
 
-	if (player)// If this is player's move.
+	if (player)    //player's turn
 	{
-		int best = -1000;
-		for (int i = 0; i<width; i++) {					
-			for (int j = 0; j<height; j++){
-				if (tiles[i][j].IsHidden()){	
-					tiles[i][j].Cross(); // take the condition to cross it and check if it is worth it in next statement.
+		int bestValue = INT_MAX; // because it will never reach that value.
 
-					best = std::max<int>(best, minimax(depth + 1, !player)); // give the opponent(ie the AI) the chance and check the best score.
-					
-					tiles[i][j].Hide();// Undo the move
-				}
-			}
-		}
-		return best + score;
-	}
-	else// If this is AI's move
-	{
-		int best = 1000;
-		for (int i = 0; i<width; i++){
-			for (int j = 0; j<height; j++){
-				if (tiles[i][j].IsHidden())
+		for (int i = 0; i < width; i++)
+			for (int j = 0; j < height; j++)
+			{
+				if (tile[i][j].IsHidden())
 				{
-					tiles[i][j].Bomb();//  take the condition to cross it and check if it is worth it in next statement.
+					tile[i][j].Cross();
 
-					best = std::min<int>(best, minimax(depth + 1, !player)); // give the opponent(ie the player) the chance and check the best score.
+					bestValue = std::min<int>(minimax(!player), bestValue);
 
-					tiles[i][j].Hide();// Undo the move
+					tile[i][j].Hide();
 				}
 			}
-		}
-		return best + score;
+		return bestValue + score;
 	}
+	else		// AI turn.
+	{
+		int bestValue = INT_MIN;
+
+		for (int i = 0; i < width; i++)
+			for (int j = 0; j < height; j++)
+			{
+				if (tile[i][j].IsHidden())
+				{
+					tile[i][j].Bomb();
+
+					bestValue = std::max<int>(minimax(!player), bestValue);
+
+					tile[i][j].Hide();
+				}
+			}
+		return bestValue + score;
+	}
+
 }
 
 bool Field::HasWon() const
 {
-	return (EvaluateScore() > 0);
+	return (EvaluateState() > 0);
 }
 
 bool Field::HasLost() const
 {
-	return (EvaluateScore() < 0);
+	return (EvaluateState() < 0);
 }
 
 bool Field::IsDraw() const
@@ -206,7 +277,7 @@ bool Field::IsDraw() const
 	for (int i = 0; i < width; i++)
 	{
 		for (int j = 0; j < height; j++)
-			if (!tiles[i][j].IsHidden())
+			if (!tile[i][j].IsHidden())
 				count++;
 	}//to check it does go on bombing somewhere and give assertion error.
 	if (count < width*height)
@@ -219,7 +290,7 @@ void Field::MoveBestMove()
 	if (HasWon() || HasLost())
 		return;
 
-	int bestVal = -1000;
+	int bestVal = INT_MIN;
 	
 	Vec2i bestMove = Vec2i(-1, -1);
 
@@ -227,19 +298,19 @@ void Field::MoveBestMove()
 	{
 		for (int i = 0; i < width; i++){
 			for (int j = 0; j < height; j++){
-				if (tiles[i][j].IsHidden())
+				if (tile[i][j].IsHidden())
 				{
 					// Make the move
-					tiles[i][j].Cross();
+					tile[i][j].Bomb();
 
 					// compute evaluation function for this move.
-					int moveVal = minimax(0, false);
+					int moveVal = minimax(true);
 
 					// Undo the move
-					tiles[i][j].Hide();
+					tile[i][j].Hide();
 
 					// update best
-					if (moveVal >= bestVal)
+					if (moveVal > bestVal)
 					{
 						bestMove.x = i;
 						bestMove.y = j;
@@ -248,8 +319,7 @@ void Field::MoveBestMove()
 				}
 			}
 		}
-		if (bestMove.x != -1 && bestMove.y != -1)
-			tiles[bestMove.x][bestMove.y].Bomb();
+		tile[bestMove.x][bestMove.y].Bomb();
 	}
 }
 
