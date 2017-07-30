@@ -46,5 +46,6 @@ private:
 	/*  User Variables          */
 	Field field;
 	Vec2i offset;
+	bool setTheField = true;
 	/********************************/
 };

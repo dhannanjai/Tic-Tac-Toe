@@ -105,6 +105,30 @@ void Field::Draw(const Vec2i & offset, Graphics & gfx) const
 	}
 }
 
+bool Field::HasWon() const
+{
+	return (EvaluateState() > 0);
+}
+
+bool Field::HasLost() const
+{
+	return (EvaluateState() < 0);
+}
+
+bool Field::IsDraw() const
+{
+	int count = 0;
+	for (int i = 0; i < width; i++)
+	{
+		for (int j = 0; j < height; j++)
+			if (!tile[i][j].IsHidden())
+				count++;
+	}//to check it does go on bombing somewhere and give assertion error.
+	if (count < width*height)
+		return false;
+	return true;
+}
+
 int Field::EvaluateLine(int a, int b, int m, int n, int x, int y) const
 {
 	int score = 0;
@@ -128,11 +152,11 @@ int Field::EvaluateLine(int a, int b, int m, int n, int x, int y) const
 	else if (tile[m][n].IsCrossed())	// if tile[m][n] is Crossed
 	{
 		if (score == -1)					// 2- in a line 
-			score = 10;
+			score = -10;
 		else if (score == 1)			// 1- in a line
 			return 0;
 		else							// tile[a][b] is not occupied yet but tile[m][n] is
-			score = 1;
+			score = -1;
 	}
 
 	//third tile
@@ -149,7 +173,7 @@ int Field::EvaluateLine(int a, int b, int m, int n, int x, int y) const
 	{
 		if (score < 0)					// means either 2- or 1- in a row for player.
 			score *= 10;
-		else if (score > 1)				//means either 2 - or 1 - in a row for AI.
+		else if (score > 0)				//means either 2 - or 1 - in a row for AI.
 			return 0;
 		else							//means tile[a][b] and tile[m][n] is unoccupied.
 			score = -1;
@@ -221,6 +245,8 @@ int Field::minimax(bool player)
 {
 	//first, evaluate the current score of the position of the board.
 	int score = EvaluateScore();
+	if (HasWon() || HasLost() || IsDraw())
+		return score;
 
 	if (player)    //player's turn
 	{
@@ -240,6 +266,7 @@ int Field::minimax(bool player)
 			}
 		return bestValue + score;
 	}
+
 	else		// AI turn.
 	{
 		int bestValue = INT_MIN;
@@ -258,68 +285,34 @@ int Field::minimax(bool player)
 			}
 		return bestValue + score;
 	}
-
-}
-
-bool Field::HasWon() const
-{
-	return (EvaluateState() > 0);
-}
-
-bool Field::HasLost() const
-{
-	return (EvaluateState() < 0);
-}
-
-bool Field::IsDraw() const
-{
-	int count = 0;
-	for (int i = 0; i < width; i++)
-	{
-		for (int j = 0; j < height; j++)
-			if (!tile[i][j].IsHidden())
-				count++;
-	}//to check it does go on bombing somewhere and give assertion error.
-	if (count < width*height)
-		return false;
-	return true;
 }
 
 void Field::MoveBestMove()
 {
-	if (HasWon() || HasLost())
-		return;
-
-	int bestVal = INT_MIN;
-	
-	Vec2i bestMove = Vec2i(-1, -1);
-
-	if (!IsDraw())
+	if (!HasWon() && !HasLost() && !IsDraw())
 	{
-		for (int i = 0; i < width; i++){
-			for (int j = 0; j < height; j++){
+		Vec2i bestMove = { -1,-1 };
+		int bestValue = INT_MIN;
+
+		for (int i = 0; i < 3; i++)
+			for (int j = 0; j < 3; j++)
+			{
 				if (tile[i][j].IsHidden())
 				{
-					// Make the move
 					tile[i][j].Bomb();
 
-					// compute evaluation function for this move.
-					int moveVal = minimax(true);
+					int value = minimax(true);		//give the player the turn.
 
-					// Undo the move
 					tile[i][j].Hide();
 
-					// update best
-					if (moveVal > bestVal)
+					if (value > bestValue)
 					{
-						bestMove.x = i;
-						bestMove.y = j;
-						bestVal = moveVal;
+						bestValue = value;
+						bestMove = { i,j };
 					}
 				}
 			}
-		}
+
 		tile[bestMove.x][bestMove.y].Bomb();
 	}
 }
-

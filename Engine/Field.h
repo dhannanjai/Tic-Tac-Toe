@@ -53,6 +53,6 @@ public:
 public:
 	const static int width = 3;
 	const static int height = 3;
-private:
+public:
 	Tile tile[width][height];
 };

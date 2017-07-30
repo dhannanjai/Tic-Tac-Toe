@@ -41,10 +41,20 @@ void Game::Go()
 
 void Game::UpdateModel()
 {
+	bool isClicked = false;
+	
+	if (setTheField == true)
+	{
+		field.tile[2][0].Cross();
+		field.tile[0][2].Cross();
+		field.tile[1][1].Bomb();
+		field.tile[2][1].Bomb();
+		field.tile[2][2].Cross();
+		isClicked = true;
+		setTheField = false;
+	}
 	if (!field.IsDraw() && !field.HasWon() && !field.HasLost())
 	{
-		bool isClicked = false;
-
 		while (!wnd.mouse.IsEmpty())
 		{
 			const auto e = wnd.mouse.Read();
@@ -57,9 +67,11 @@ void Game::UpdateModel()
 				}
 			}
 		}
-
-		if (isClicked)
-			field.MoveBestMove();
+	}
+	if (isClicked)
+	{
+		isClicked = false;
+		field.MoveBestMove();
 	}
 }
 
