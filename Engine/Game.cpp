@@ -42,7 +42,7 @@ void Game::Go()
 void Game::UpdateModel()
 {
 	bool isClicked = false;
-	
+	/*
 	if (setTheField == true)
 	{
 		field.tile[2][0].Cross();
@@ -52,7 +52,7 @@ void Game::UpdateModel()
 		field.tile[2][2].Cross();
 		isClicked = true;
 		setTheField = false;
-	}
+	}*/
 	if (!field.IsDraw() && !field.HasWon() && !field.HasLost())
 	{
 		while (!wnd.mouse.IsEmpty())
